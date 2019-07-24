@@ -1,26 +1,41 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import { Router, Link, RouteComponentProps } from "@reach/router";
 
-const App: React.FC = () => {
+// import 'abortcontroller-polyfill/dist/polyfill-patch-fetch'
+
+const Home = (props: RouteComponentProps) => {
+  const [joke, setJoke] = useState<any>();
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`https://api.chucknorris.io/jokes/random`, {
+      signal: controller.signal
+    })
+      .then(response => response.json())
+      .then(setJoke)
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, []);
+
+  return <pre>{JSON.stringify(joke, null, 2)}</pre>;
+};
+const Dash = (props: RouteComponentProps) => <div>Dash</div>;
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{padding: 24}}>
+      <nav>
+        <Link to="/">Home</Link> | <Link to="dashboard">Dashboard</Link>
+      </nav>
+      <Router>
+        <Home path="/" />
+        <Dash path="dashboard" />
+      </Router>
     </div>
   );
-}
+};
 
 export default App;
